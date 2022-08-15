@@ -1,0 +1,7 @@
+---
+title: "affinity_line_plots"
+format: html
+editor: visual
+---
+
+## This document will be used to write the code to generate the affinity line plots
