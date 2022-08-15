@@ -5,3 +5,9 @@ editor: visual
 ---
 
 ## This document will be used to write the code to generate the affinity line plots
+
+```{r}
+#Here is a code chunk.
+
+
+```
