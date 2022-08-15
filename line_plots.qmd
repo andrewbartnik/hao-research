@@ -16,13 +16,17 @@ library(here)
 ```{r}
 ## Loop through each file in directory, load it as the first 3 letters of the file - "gly.csv" would load as gly
 
+list <- lapply(Sys.glob("*.csv"), read.csv)
 
-dir <- here("csv_files", "")
+amino_acids <- c("ala", "arg", "asn", "asp", "gln", "glu", "gly", "his", "ile", "leu", "lys", "phe", "pro", "ser", "thr", "trp", "tyr", "val")
+
+
+ala <- as.data.frame(list[1])
 ```
 
 ### Clean data - remove unused columns
 
-### Clean data 2 - remove shallow rock and other unused rows 
+### Clean data 2 - remove shallow rock and other unused rows
 
 ### Clean data 3 - split into 4 different data frames
 
