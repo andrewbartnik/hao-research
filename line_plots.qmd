@@ -11,17 +11,29 @@ library(tidyverse)
 library(here)
 ```
 
-### import csvs (for loop)
+### Read in files, use a for loop to assign csv files to their named dataframes
 
 ```{r}
 ## Loop through each file in directory, load it as the first 3 letters of the file - "gly.csv" would load as gly
 
+#setwd("csv_files") - uncomment when to set wd
+
+#read in all csv files in csv_files folder
 list <- lapply(Sys.glob("*.csv"), read.csv)
 
-amino_acids <- c("ala", "arg", "asn", "asp", "gln", "glu", "gly", "his", "ile", "leu", "lys", "phe", "pro", "ser", "thr", "trp", "tyr", "val")
+#create a vector that we'll use to name the dataframe for each amino acid
+amino_acids <- list("ala", "arg", "asn", "asp", "gln", "glu", "gly", "his", "ile", "leu", "lys", "phe", "pro", "ser", "thr", "trp", "tyr", "val")
 
 
-ala <- as.data.frame(list[1])
+#loop through each csv in list, store as its corresponding amino acid in a dataframe
+for(i in list) {
+  for(j in amino_acids) {
+    amino_acids[j] <- as.data.frame(list[i])
+    break
+    }
+}
+
+
 ```
 
 ### Clean data - remove unused columns
