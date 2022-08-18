@@ -9,34 +9,42 @@ editor: visual
 ```{r}
 library(tidyverse)
 library(here)
+library(purrr)
+
 ```
 
 ### Read in files, use a for loop to assign csv files to their named dataframes
 
 ```{r}
-## Loop through each file in directory, load it as the first 3 letters of the file - "gly.csv" would load as gly
 
-#setwd("csv_files") - uncomment when to set wd
+#setwd("csv_files") 
+fs <- list.files()
 
+amino_acids <- str_remove(fs, ".csv") 
 #read in all csv files in csv_files folder
-list <- lapply(Sys.glob("*.csv"), read.csv)
+dfs <- lapply(fs, read_csv) 
 
-#create a vector that we'll use to name the dataframe for each amino acid
-amino_acids <- list("ala", "arg", "asn", "asp", "gln", "glu", "gly", "his", "ile", "leu", "lys", "phe", "pro", "ser", "thr", "trp", "tyr", "val")
-
-
-#loop through each csv in list, store as its corresponding amino acid in a dataframe
-for(i in list) {
-  for(j in amino_acids) {
-    amino_acids[j] <- as.data.frame(list[i])
-    break
-    }
-}
-
+## assign .csv filenames to their corresponding dataframe
+names(dfs) <- amino_acids; list2env(dfs, envir = .GlobalEnv) 
 
 ```
 
 ### Clean data - remove unused columns
+
+```{r}
+
+## removing unused columns across the list
+cleaned <- lapply(dfs, function(x) x |> select_if(~ any(.x == c("pH", "Deep Rock", "Affinity (tot)"))))
+
+## Saving the names back to their variable assignments
+names(cleaned) <- amino_acids; list2env(cleaned, envir = .GlobalEnv)
+
+
+```
+
+```{r}
+
+```
 
 ### Clean data 2 - remove shallow rock and other unused rows
 
