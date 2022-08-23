@@ -29,17 +29,21 @@ names(dfs) <- amino_acids; list2env(dfs, envir = .GlobalEnv)
 
 ```
 
-### Clean data - remove unused columns
+### Clean data - remove unneeded columns
 
 ```{r}
 
 ## removing unused columns across the list
-cleaned <- lapply(dfs, function(x) x |> select_if(~ any(.x == c("pH", "Deep Rock", "Affinity (tot)"))))
+cleaned <- lapply(dfs, function(x) x |> select_if(~ any(.x == c("Affinity (tot)", 
+                                                                "pH", 
+                                                                "Temperature"))) |> 
+                    select(3,4) |> 
+                     rename(affinity = 1,
+                            ph = 2))
+                    
 
 ## Saving the names back to their variable assignments
-names(cleaned) <- amino_acids; list2env(cleaned, envir = .GlobalEnv)
-
-
+names(cleaned) <- amino_acids; list2env(cleaned, envir = .GlobalEnv) 
 ```
 
 ```{r}
