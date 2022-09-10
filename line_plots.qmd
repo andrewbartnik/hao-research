@@ -43,31 +43,33 @@ cleaned <- lapply(dfs, function(x) x |> select_if(~ any(.x == c("Affinity (tot)"
                                                c('Affinity (tot)', 'Temperature', 'pH')))) |> 
                     filter(keep == TRUE) |> 
                     slice(2:85) |> 
+                    mutate(across(where(is.character), as.double)) |> 
                     select(temp, affinity, ph))
-                    
-  
-                    
-                  
-                            
-                            
-                    
-  
-                    
-
 ## Saving the names back to their variable assignments
 names(cleaned) <- amino_acids; list2env(cleaned, envir = .GlobalEnv) 
 
-
-##mutate to make a new column that returns NA when column b is not the condition that we're interested in- use - if_else(str_detect(affinity, "activity"), affinity, NA)
-
-# use fill down - take non NA to fill NA below 
 ```
 
 ```{r}
+# Slice through cleaned by index to get our 4 different conditions as a list of dataframes
+deep_8 <- lapply(cleaned, function(x) x |> 
+                   slice(1:42))
+deep_11 <- lapply(cleaned, function(x) x |> 
+                    slice(43:84))
+
+deep_8_highc_highh <- lapply(cleaned, function(x) x |> slice(1:21))
+deep_8_lowc_lowh <- lapply(cleaned, function(x) x |> slice(22:42))
+deep_11_highc_highh <- lapply(cleaned, function(x) x |> slice(43:63))
+deep_11_lowc_lowh <- lapply(cleaned, function(x) x |> slice(64:84))
+
 ```
 
-### Clean data 2 - remove shallow rock and other unused rows
+```{r}
+# Start plotting!
 
-### Clean data 3 - split into 4 different data frames
 
-### Clean data 4 - rename columns
+
+lapply(deep_8, function(x) x |> 
+         ggplot(aes(x = ph, y = affinity)) + geom_line())
+
+```
