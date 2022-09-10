@@ -34,20 +34,36 @@ names(dfs) <- amino_acids; list2env(dfs, envir = .GlobalEnv)
 ```{r}
 
 ## removing unused columns across the list
-cleaned <- lapply(dfs, function(x) x |> select_if(~ any(.x == c("Affinity (tot)", 
-                                                                "pH", 
-                                                                "Temperature"))) |> 
-                    select(3,4) |> 
-                     rename(affinity = 1,
-                            ph = 2))
+cleaned <- lapply(dfs, function(x) x |> select_if(~ any(.x == c("Affinity (tot)", "pH", "Temperature"))) |> 
+                    select(1,3,4) |> 
+                    rename(temp = 1, affinity = 2, ph = 3) |> 
+                    mutate(keep = if_else((is.na(affinity) & is.na(ph)), FALSE, TRUE)) |> 
+                    filter(across(everything(), 
+                                  ~ !str_detect(., 
+                                               c('Affinity (tot)', 'Temperature', 'pH')))) |> 
+                    filter(keep == TRUE) |> 
+                    slice(2:85) |> 
+                    select(temp, affinity, ph))
+                    
+  
+                    
+                  
+                            
+                            
+                    
+  
                     
 
 ## Saving the names back to their variable assignments
 names(cleaned) <- amino_acids; list2env(cleaned, envir = .GlobalEnv) 
+
+
+##mutate to make a new column that returns NA when column b is not the condition that we're interested in- use - if_else(str_detect(affinity, "activity"), affinity, NA)
+
+# use fill down - take non NA to fill NA below 
 ```
 
 ```{r}
-
 ```
 
 ### Clean data 2 - remove shallow rock and other unused rows
