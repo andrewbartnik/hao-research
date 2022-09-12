@@ -10,6 +10,7 @@ editor: visual
 library(tidyverse)
 library(here)
 library(purrr)
+library(ggprism)
 
 ```
 
@@ -52,12 +53,23 @@ names(cleaned) <- amino_acids; list2env(cleaned, envir = .GlobalEnv)
 
 ```{r}
 # Slice through cleaned by index to get our 4 different conditions as a list of dataframes
-deep_8 <- lapply(cleaned, function(x) x |> 
-                   slice(1:42))
-deep_11 <- lapply(cleaned, function(x) x |> 
-                    slice(43:84))
 
-deep_8_highc_highh <- lapply(cleaned, function(x) x |> slice(1:21))
+c <- 1:42
+c[1:21] = TRUE
+c[22:42] = FALSE
+c = as.factor(c)
+deep_8 <- lapply(cleaned, function(x) x |> 
+                   slice(1:42) |> 
+                   mutate(cond = c) |> 
+                   gather(key = cond, value = affinity, ))
+                   
+deep_11 <- lapply(cleaned, function(x) x |> 
+                    slice(43:84) |> 
+                    mutate(cond = c))
+
+deep_8_highc_highh <- lapply(cleaned, function(x) x |> 
+                               slice(1:21))
+
 deep_8_lowc_lowh <- lapply(cleaned, function(x) x |> slice(22:42))
 deep_11_highc_highh <- lapply(cleaned, function(x) x |> slice(43:63))
 deep_11_lowc_lowh <- lapply(cleaned, function(x) x |> slice(64:84))
@@ -68,8 +80,46 @@ deep_11_lowc_lowh <- lapply(cleaned, function(x) x |> slice(64:84))
 # Start plotting!
 
 
+  lapply(deep_11, function(x) x |> 
+          ggplot(aes(x = ph, y = affinity)) + geom_line(aes(color = cond))) 
 
-lapply(deep_8, function(x) x |> 
-         ggplot(aes(x = ph, y = affinity)) + geom_line())
+```
 
+```{r}
+```
+
+```{r}
+alanine <- deep_11$ala
+alanine <- alanine |> 
+  pivot_wider(id_cols = temp, names_from = cond, values_from = c(affinity, ph), id_expand = TRUE) |> unnest(cols = c(affinity_1, affinity_0, ph_1, ph_0))
+
+ggplot(alanine) + 
+  geom_line(aes(x = ph_1, y = affinity_1), alpha = 0) + 
+  geom_line(aes(x = ph_0, y = affinity_0), alpha = 0) + 
+  geom_ribbon(aes(x = ph_1, 
+                  ymin = affinity_1,
+                  ymax = affinity_0), 
+              fill = 'deepskyblue') +
+  scale_x_continuous(limits = c(7, 13), 
+                     guide = guide_prism_minor()) +
+  scale_y_continuous(limits = c(-90, 60),
+                     breaks = seq(-80, 60, by = 20),
+                     guide = guide_prism_minor()) + 
+  labs(x = 'pH', y = 'Affinity (J/mole)') + 
+  geom_hline(yintercept = 0, linetype=2, alpha = 0.75) + 
+  geom_vline(xintercept = 8.5, linetype = 'dotted', alpha = 0.5) + 
+  geom_vline(xintercept = 11, linetype = 'dotted', alpha = 0.5) + 
+  geom_segment(y = 50, 
+               yend = 50, 
+               linetype = 1, 
+               x = 8.5, 
+               xend = 11,
+               arrow = arrow(ends = 'both', 
+                             length = unit(0.25, 'cm'))) + 
+  annotate('text', x = 9.75, y = 55, label = 'Enceladus ocean water') +
+  theme_classic()
+
+```
+
+```{alanine}
 ```
