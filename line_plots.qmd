@@ -76,6 +76,7 @@ deep_11 <- lapply(cleaned, function(x) x |>
                                 values_from = c(affinity, ph), 
                                 id_expand = TRUE) |> 
                     unnest(cols = c(affinity_1, affinity_0, ph_1, ph_0)))
+                             
 
 deep_8_highc_highh <- lapply(cleaned, function(x) x |> 
                                slice(1:21))
@@ -124,8 +125,8 @@ titles <- list('Alanine', 'Arginine', 'Asparagine', 'Aspartate', 'Glutamine', 'G
 ```
 
 ```{r}
-for (i in deep_11) {
-  p = ggplot(i) + 
+for (i in seq_along(deep_11)) {
+  p = ggplot(deep_11[[i]]) + 
   geom_line(aes(x = ph_1, y = affinity_1), alpha = 0) + 
   geom_line(aes(x = ph_0, y = affinity_0), alpha = 0) + 
   geom_ribbon(aes(x = ph_1, 
@@ -150,13 +151,17 @@ for (i in deep_11) {
                              length = unit(0.25, 'cm'))) + 
   annotate('text', x = 9.75, y = 55, label = 'Enceladus ocean water') +
   theme_classic() +
-    ggtitle(paste0(names(deep_11)[i], 'pH = 11')) 
-  ggsave(path = '/figs', device = 'png', filename = paste0(names(deep_11)[i], 'ph_11'), plot = p)
+    ggtitle(print(paste0(names(deep_11)[[i]], 'pH = 11'))) 
+  ggsave(here(path = 'figs', print(paste0(names(deep_11)[[i]], '_ph_11.png'))))
   }
 ```
 
 ```{r}
-alanine <- as.data.frame(matrix(unlist(deep_11$ala), ncol = 5, nrow = 21))
+deep_11$ala <- as.data.frame(matrix(unlist(deep_11$ala), ncol = 5, nrow = 21))
+
+for(i in seq_along(deep_11)){
+  print(names(deep_11)[[i]])
+}
 
 
 ```
