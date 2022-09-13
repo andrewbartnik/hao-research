@@ -40,12 +40,12 @@ cleaned <- lapply(dfs, function(x) x |> select_if(~ any(.x == c("Affinity (tot)"
                     rename(temp = 1, affinity = 2, ph = 3) |> 
                     mutate(keep = if_else((is.na(affinity) & is.na(ph)), FALSE, TRUE)) |> 
                     filter(across(everything(), 
-                                  ~ !str_detect(., 
-                                               c('Affinity (tot)', 'Temperature', 'pH')))) |> 
+                                  ~ !str_detect(.,c('Affinity (tot)', 'Temperature', 'pH'))))|>
                     filter(keep == TRUE) |> 
                     slice(2:85) |> 
                     mutate(across(where(is.character), as.double)) |> 
                     select(temp, affinity, ph))
+
 ## Saving the names back to their variable assignments
 names(cleaned) <- amino_acids; list2env(cleaned, envir = .GlobalEnv) 
 
@@ -59,13 +59,24 @@ c[1:21] = TRUE
 c[22:42] = FALSE
 c = as.factor(c)
 deep_8 <- lapply(cleaned, function(x) x |> 
+                   as.data.frame() |> 
                    slice(1:42) |> 
                    mutate(cond = c) |> 
-                   gather(key = cond, value = affinity, ))
+                   pivot_wider(id_cols = temp, 
+                               names_from = cond, 
+                               values_from = c(affinity, ph), 
+                               id_expand = TRUE) |> 
+                   unnest(cols = c(affinity_1, affinity_0, ph_1, ph_0)))
                    
 deep_11 <- lapply(cleaned, function(x) x |> 
                     slice(43:84) |> 
-                    mutate(cond = c))
+                    mutate(cond = c) |> 
+                    pivot_wider(id_cols = temp, 
+                                names_from = cond, 
+                                values_from = c(affinity, ph), 
+                                id_expand = TRUE) |> 
+                    unnest(cols = c(affinity_1, affinity_0, ph_1, ph_0)))
+                             
 
 deep_8_highc_highh <- lapply(cleaned, function(x) x |> 
                                slice(1:21))
@@ -77,23 +88,9 @@ deep_11_lowc_lowh <- lapply(cleaned, function(x) x |> slice(64:84))
 ```
 
 ```{r}
-# Start plotting!
 
-
-  lapply(deep_11, function(x) x |> 
-          ggplot(aes(x = ph, y = affinity)) + geom_line(aes(color = cond))) 
-
-```
-
-```{r}
-```
-
-```{r}
-alanine <- deep_11$ala
-alanine <- alanine |> 
-  pivot_wider(id_cols = temp, names_from = cond, values_from = c(affinity, ph), id_expand = TRUE) |> unnest(cols = c(affinity_1, affinity_0, ph_1, ph_0))
-
-ggplot(alanine) + 
+plot <- function(x) {
+  ggplot(x) +
   geom_line(aes(x = ph_1, y = affinity_1), alpha = 0) + 
   geom_line(aes(x = ph_0, y = affinity_0), alpha = 0) + 
   geom_ribbon(aes(x = ph_1, 
@@ -118,8 +115,53 @@ ggplot(alanine) +
                              length = unit(0.25, 'cm'))) + 
   annotate('text', x = 9.75, y = 55, label = 'Enceladus ocean water') +
   theme_classic()
+}
+```
+
+```{r}
+titles <- list('Alanine', 'Arginine', 'Asparagine', 'Aspartate', 'Glutamine', 'Glutamic Acid', 'Glycine', 'Histidine', 'Isoleucine', 'Leucine', 'Lysine', 'Phenylalanine', 'Proline', 'Serine', 'Threonine', 'Tryptophan', 'Tyrosine', 'Valine')
+                          
 
 ```
 
-```{alanine}
+```{r}
+for (i in seq_along(deep_11)) {
+  p = ggplot(deep_11[[i]]) + 
+  geom_line(aes(x = ph_1, y = affinity_1), alpha = 0) + 
+  geom_line(aes(x = ph_0, y = affinity_0), alpha = 0) + 
+  geom_ribbon(aes(x = ph_1, 
+                  ymin = affinity_1,
+                  ymax = affinity_0), 
+              fill = 'deepskyblue') +
+  scale_x_continuous(limits = c(7, 13), 
+                     guide = guide_prism_minor()) +
+  scale_y_continuous(limits = c(-90, 60),
+                     breaks = seq(-80, 60, by = 20),
+                     guide = guide_prism_minor()) + 
+  labs(x = 'pH', y = 'Affinity (J/mole)') + 
+  geom_hline(yintercept = 0, linetype=2, alpha = 0.75) + 
+  geom_vline(xintercept = 8.5, linetype = 'dotted', alpha = 0.5) + 
+  geom_vline(xintercept = 11, linetype = 'dotted', alpha = 0.5) + 
+  geom_segment(y = 50, 
+               yend = 50, 
+               linetype = 1, 
+               x = 8.5, 
+               xend = 11,
+               arrow = arrow(ends = 'both', 
+                             length = unit(0.25, 'cm'))) + 
+  annotate('text', x = 9.75, y = 55, label = 'Enceladus ocean water') +
+  theme_classic() +
+    ggtitle(print(paste0(names(deep_11)[[i]], 'pH = 11'))) 
+  ggsave(here(path = 'figs', print(paste0(names(deep_11)[[i]], '_ph_11.png'))))
+  }
+```
+
+```{r}
+deep_11$ala <- as.data.frame(matrix(unlist(deep_11$ala), ncol = 5, nrow = 21))
+
+for(i in seq_along(deep_11)){
+  print(names(deep_11)[[i]])
+}
+
+
 ```
