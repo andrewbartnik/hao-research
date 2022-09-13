@@ -116,6 +116,6 @@ for (i in seq_along(deep_11)) {
   annotate('text', x = 9.75, y = 55, label = 'Enceladus ocean water') +
   theme_classic() +
     ggtitle(print(paste0(names(deep_11)[[i]], ' pH = 11'))) 
-  ggsave(here(path = 'figs', print(paste0(names(deep_11)[[i]], '_ph_11.png'))))
+  ggsave(here(path = 'figs', print(paste0(names(deep_11)[[i]], '_ph_11.png'))), width = 11, height = 7)
 }
 ```
